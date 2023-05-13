@@ -1,0 +1,90 @@
+esphome:
+  name: "parking3-4"
+  friendly_name: Parking3-4
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "BvQ2vfAJ7LkKPAJPPvcx+liEgogYfAAClH5wNLEIBZ0="
+
+ota:
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-657Cdc"
+    password: "MT1fUVkrQdHm"
+
+captive_portal:
+    
+sensor:
+  - platform: ultrasonic
+    trigger_pin: GPIO25
+    echo_pin: GPIO34
+    name: "Ultrasonic_3"
+    update_interval: 1s
+    id: three_ultrasonic
+  - platform: ultrasonic
+    trigger_pin: GPIO26
+    echo_pin: GPIO35
+    name: "Ultrasonic_4"
+    update_interval: 1s
+    id: four_ultrasonic
+
+binary_sensor:
+  - platform: template
+    name: "park3"
+    lambda: |-
+      return (id(three_ultrasonic).state < 0.2);
+    device_class: occupancy
+    on_press:
+      - switch.turn_on: three_red
+      - switch.turn_off: three_green
+    on_release:
+      - switch.turn_off: three_red
+      - switch.turn_on: three_green
+  - platform: template
+    name: "park4"
+    lambda: |-
+      return (id(four_ultrasonic).state < 0.2);
+    device_class: occupancy
+    on_press:
+      - switch.turn_on: four_red
+      - switch.turn_off: four_green
+    on_release:
+      - switch.turn_off: four_red
+      - switch.turn_on: four_green
+    
+switch:
+  - platform: gpio
+    name: "3_green"
+    id: three_green
+    pin:
+      number: GPIO33
+  - platform: gpio
+    name: "3_red"
+    id: three_red
+    pin:
+      number: GPIO32
+  - platform: gpio
+    name: "4_green"
+    id: four_green
+    pin:
+      number: GPIO13
+  - platform: gpio
+    name: "four_red"
+    id: four_red
+    pin:
+      number: GPIO12

@@ -1,0 +1,93 @@
+esphome:
+  name: "ingang"
+  friendly_name: Ingang
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "VJMS2cITEp8oFcU+uDuNDRQCimhM1z88e5fcXWOZE2w="
+
+ota:
+  password: "51162c151f13818e4f0dbdbf46b0c18a"
+
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-D929C0"
+    password: "9cNZ7v7fxRJT"
+
+captive_portal:
+    
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO32
+      mode: INPUT_PULLUP
+      #inverted: true
+    name: "PIR Sensorrr"
+    device_class: motion
+
+switch:
+  - platform: gpio
+    name: "light_1"
+    pin:
+      number: GPIO33
+  - platform: gpio
+    name: "light_2"
+    pin:
+      number: GPIO25
+  - platform: gpio
+    name: "light_3"
+    pin:
+      number: GPIO26
+
+servo:
+  - id: poort_servo
+    output: pwm_output
+
+output:
+  - platform: ledc
+    id: pwm_output
+    pin: GPIO27
+    frequency: 50 Hz
+
+number:
+  - platform: template
+    name: garage_servo
+    min_value: 0
+    max_value: 1
+    step: 1
+    optimistic: true
+    set_action:
+      then:
+        - logger.log: "set action of servo was triggered"
+        - lambda: |-
+            auto servo_angle = 180 * x;
+            id(poort_servo).write(servo_angle);
+
+sensor:
+  - platform: ultrasonic
+    trigger_pin: GPIO12
+    echo_pin: GPIO35
+    name: "Barrier sensor"
+    update_interval: 1s
+    id: barrier_sensor
+
+  - platform: ultrasonic
+    trigger_pin: GPIO13
+    echo_pin: GPIO34
+    name: "Car sensor"
+    update_interval: 500ms
+    id: car_sensor

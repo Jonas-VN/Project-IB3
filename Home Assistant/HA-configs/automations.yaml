@@ -1,0 +1,168 @@
+- id: '1678803494741'
+  alias: Plate recognition
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.camera_car_count
+  condition:
+  - condition: and
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.camera_car_count
+      above: 0
+  action:
+  - service: image_processing.scan
+    data: {}
+    target:
+      entity_id: image_processing.platerecognizer_camera
+  mode: single
+- id: '1680006307033'
+  alias: Plate to backend
+  description: ''
+  trigger:
+  - platform: event
+    event_type: platerecognizer.vehicle_detected
+    event_data: {}
+  condition: []
+  action:
+  - service: rest_command.send_license_plate
+    data:
+      license_plate: '{{ trigger.event.data.plate }}'
+  mode: single
+- id: '1683017357622'
+  alias: barriere_open
+  description: ''
+  trigger:
+  - type: value
+    platform: device
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: sensor.ingang_barrier_sensor
+    domain: sensor
+    below: 0.05
+  condition: []
+  action:
+  - device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    domain: number
+    entity_id: number.ingang_garage_servo
+    type: set_value
+    value: 0
+  mode: single
+- id: '1683018232228'
+  alias: Close barrier inrijden
+  description: ''
+  trigger:
+  - type: value
+    platform: device
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: sensor.ingang_car_sensor
+    domain: sensor
+    below: 0.2
+  condition:
+  - condition: numeric_state
+    entity_id: number.ingang_garage_servo
+    below: 1
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 3
+      milliseconds: 0
+  - device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    domain: number
+    entity_id: number.ingang_garage_servo
+    type: set_value
+    value: 1
+  mode: single
+- id: '1683022470318'
+  alias: BEweging_ingang
+  description: ''
+  trigger:
+  - type: motion
+    platform: device
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: binary_sensor.ingang_pir_sensorrr
+    domain: binary_sensor
+  condition: []
+  action:
+  - type: turn_on
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_1
+    domain: switch
+  - type: turn_on
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_2
+    domain: switch
+  - type: turn_on
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_3
+    domain: switch
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 30
+      milliseconds: 0
+  - type: turn_off
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_1
+    domain: switch
+  - type: turn_off
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_2
+    domain: switch
+  - type: turn_off
+    device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    entity_id: switch.ingang_light_3
+    domain: switch
+  mode: single
+- id: '1683027510881'
+  alias: Barrier open & sluiten buitenrijden
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: sensor.ingang_car_sensor
+    above: 0
+    below: 0.2
+  condition:
+  - condition: and
+    conditions:
+    - condition: numeric_state
+      entity_id: number.ingang_garage_servo
+      above: 0
+  action:
+  - device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    domain: number
+    entity_id: number.ingang_garage_servo
+    type: set_value
+    value: 0
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    domain: number
+    entity_id: number.ingang_garage_servo
+    type: set_value
+    value: 1
+  mode: single
+- id: '1683029777979'
+  alias: barrier down after 30 sec
+  description: ''
+  trigger:
+  - platform: numeric_state
+    entity_id: number.ingang_garage_servo
+    below: 1
+  condition: []
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 20
+      milliseconds: 0
+  - device_id: 79884103ef0a478ebc25ce7cd3cd882f
+    domain: number
+    entity_id: number.ingang_garage_servo
+    type: set_value
+    value: 1
+  mode: single

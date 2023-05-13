@@ -1,0 +1,40 @@
+mqtt:
+  host: 10.129.48.4
+  port: 1883
+  user: root
+  password: root
+cameras:
+  camera:
+    ffmpeg:
+      input_args: -avoid_negative_ts make_zero -fflags nobuffer -flags low_delay -strict experimental -fflags +genpts+discardcorrupt -use_wallclock_as_timestamps 1
+      output_args:
+        record: -f segment -segment_time 10 -segment_format mp4 -reset_timestamps 1 -strftime 1 -c:v libx264 -an
+        rtmp: -c:v libx264 -an -f flv
+      inputs:
+        - path: rtsp://admin:giniloc@10.129.48.12:8554/Streaming/Channels/101
+          roles:
+            - detect
+            - rtmp
+    rtmp:
+      enabled: False
+    detect:
+      width: 1920
+      height: 1080
+      fps: 5
+      max_disappeared: 5
+    snapshots:
+      enabled: True
+      bounding_box: True
+      retain:
+        default: 30
+    objects:
+      track:
+        - car
+      filters:
+        car:
+          threshold: 0.5
+detectors:
+  cpu1:
+    type: cpu
+    num_threads: 4
+    

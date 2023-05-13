@@ -1,0 +1,70 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+
+rest_command:
+  send_license_plate:
+    url: http://10.129.48.14:3000/giveLicensePlate
+    method: POST
+    headers:
+      accept: "application/json, text/html"
+      authorization: "Bearer IB3-ReGiJo"
+    payload: '{"plate": "{{ license_plate }}"}'
+    content_type:  'application/json; charset=utf-8'
+
+
+image_processing:
+  - platform: platerecognizer
+    api_token: a1acb185898184444f12e27a814f6d099e982a85
+    regions:
+      - be
+    save_file_folder: /config/www/plates
+    save_timestamped_file: True
+    always_save_latest_file: True
+    source:
+      - entity_id: camera.camera
+      
+
+mqtt:
+  broker: 10.129.48.4
+  port: 1883
+  username: homeassistant
+  password: AeDuk1def9aiGouYi3eiquaivaetheu3phohl0phahW8aiQuoo5NaiH6Eesiel9i
+  discovery: true
+  discovery_prefix: homeassistant
+  #camera.camera_2_car
+  
+
+panel_custom:
+  - name: panel_server_controls
+    sidebar_title: Server Control
+    sidebar_icon: mdi:restart
+    url_path: 'config/server_control'
+    module_url: /api/hassio/app/entrypoint.js
+    embed_iframe: true
+    require_admin: true
+  - name: panel_integrations
+    sidebar_title: Integrations
+    sidebar_icon: mdi:audio-input-rca
+    url_path: 'config/integrations'
+    module_url: /api/hassio/app/entrypoint.js
+    embed_iframe: true
+    require_admin: true
+  - name: panel_automations
+    sidebar_title: Automations
+    sidebar_icon: mdi:cogs
+    url_path: 'config/automation'
+    module_url: /api/hassio/app/entrypoint.js
+    embed_iframe: true
+    require_admin: true
+
+  
+
